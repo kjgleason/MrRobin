@@ -1,0 +1,11 @@
+citHeader("To cite MrRobin in publications, please use:")
+
+citEntry(entry = "Unpublished",
+  author = "Fan Yang and Kevin J. Gleason and Jiebiao Wang and Jubao Duan and Xin He and Brandon L. Pierce and Lin S. Chen",
+  title = "Mapping robust trans-associations via cross-condition mediation analyses and validating trait-associations of trans-genes for GWAS SNPs.",
+  note = "https://github.com/kjgleason/MrRobin",
+  textVersion = paste("F. Yang, K.J. Gleason, J. Wang, J. Duan, X. He, B.L. Pierce and L.S. Chen.",
+                      "Mapping robust trans-associations via cross-condition mediation analyses",
+                      "and validating trait-associations of trans-genes for GWAS SNPs.",
+                      "Manuscript in preparation.")
+)

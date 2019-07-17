@@ -1,0 +1,19 @@
+Package: MrRobin
+Type: Package
+Title: Two-sample Mendelian Randomization method ROBust to correlated and some INvalid instruments.
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Kevin J.", "Gleason", email = "kevin.j.gleason@gmail.com", role=c("aut","cre")),
+    person("Fan", "Yang", email = "FAN.3.YANG@ucdenver.edu", role="aut"),
+    person("Lin S.", "Chen", email = "lchen@health.bsd.uchicago.edu", role="aut"))
+Maintainer: Kevin J. Gleason <kevin.j.gleason@gmail.com>
+Description: Implements the MR-Robin algorithm, a two-sample summary-statistics based
+    Mendelian Randomization method that allows for correlated and (some) invalid instruments
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    lme4 (>= 1.1),
+    matrixStats (>= 0.53.1),
+    mvtnorm (>= 1.0)
+RoxygenNote: 6.1.1

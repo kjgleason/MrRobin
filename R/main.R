@@ -28,13 +28,9 @@ MR_Robin <- function(eqtl_betas,eqtl_se,gwas_betas,gwas_se,LD,snpID){
   ## determine number of tissues (or conditions/studies/etc.)
   nT <- ncol(eqtl_betas)
 
-  ## create LD^(-1/2) matrix
-  ss <- svd(LD)
-  Tau <- ss$u%*%diag(ss$d^(-0.5))%*%t(ss$u)
-
-  ## transform betas to account for LD between SNPs
-  beta_x <- matrix(Tau %*% eqtl_betas, ncol=1)
-  beta_y <- rep(Tau %*% gwas_betas, nT)
+  ## set up coefficients for reverse regression
+  beta_x <- matrix(eqtl_betas,ncol=1)
+  beta_y <- rep(gwas_betas, nT)
 
   ## standard errors (for weights)
   se_x <- matrix(eqtl_se, ncol=1)
@@ -68,7 +64,7 @@ MR_Robin <- function(eqtl_betas,eqtl_se,gwas_betas,gwas_se,LD,snpID){
 #'
 #' @export
 #'
-MR_Robin_resample <- function(MR_Robin_res,gwas_se,nsamp=1000){
+MR_Robin_resample <- function(MR_Robin_res,gwas_se,nsamp=1000,LD){
 
   ## extract data from MR-Robin results
   eqtl_betas <- MR_Robin_res@frame$beta_x
@@ -77,8 +73,8 @@ MR_Robin_resample <- function(MR_Robin_res,gwas_se,nsamp=1000){
   tstat_MR_Robin <- summary(MR_Robin_res)$coefficients[1,3]
   nT <- length(eqtl_betas)/length(unique(snpID))
 
-  ## bootstrapped null distribution
-  beta_gwas_nullMat <- mvtnorm::rmvnorm(nsamp,mean=rep(0,length(gwas_se)),sigma=diag(gwas_se^2))
+  ## bootstrapped null distribution, accounting for LD correlations
+  beta_gwas_nullMat <- mvtnorm::rmvnorm(nsamp,mean=rep(0,length(gwas_se)),sigma=diag(gwas_se) %*% LD %*% diag(gwas_se))
 
   ## initialize return vectors
   tstat_nulls <- NULL

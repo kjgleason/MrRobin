@@ -20,4 +20,4 @@ To install and load functions from `MrRobin`, run the following:
 
 To cite `MrRobin` in publications, please use:
 
-Fan Yang, Kevin J. Gleason, Jiebiao Wang, Jubao Duan, Xin He, Brandon L. Pierce and Lin S. Chen. Mapping robust trans-associations via cross-condition mediation analyses and validating trait-associations of trans-genes for GWAS SNPs. Manuscript in preparation.
+Fan Yang, Kevin J. Gleason, Jiebiao Wang, The GTEx consortium, Jubao Duan, Xin He, Brandon L. Pierce and Lin S. Chen. CCmed: cross-condition mediation analysis for identifying robust trans-eQTLs and assessing their effects on human traits. bioRxiv (2019), doi:10.1101/803106.

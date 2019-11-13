@@ -52,6 +52,7 @@ MR_Robin <- function(eqtl_betas,eqtl_se,gwas_betas,gwas_se,LD,snpID){
 #' @param gwas_se vector of standard errors for coefficient estimates from GWAS study.
 #' @param nsamp integer of the number of samples to use in estimating \eqn{P}-value
 #' using a null distribution.
+#' @param LD matrix of LD correlation coefficients.
 #'
 #' @return A list of two elements:
 #' \tabular{ll}{

@@ -4,7 +4,7 @@
 \alias{MR_Robin_resample}
 \title{Obtain p-value from MR-Robin results}
 \usage{
-MR_Robin_resample(MR_Robin_res, gwas_se, nsamp = 1000)
+MR_Robin_resample(MR_Robin_res, gwas_se, nsamp = 1000, LD)
 }
 \arguments{
 \item{MR_Robin_res}{an object of class \code{lmerMod}, returned by \code{MR_Robin}.}
@@ -13,6 +13,8 @@ MR_Robin_resample(MR_Robin_res, gwas_se, nsamp = 1000)
 
 \item{nsamp}{integer of the number of samples to use in estimating \eqn{P}-value
 using a null distribution.}
+
+\item{LD}{matrix of LD correlation coefficients.}
 }
 \value{
 A list of two elements:

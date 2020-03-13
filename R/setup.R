@@ -109,14 +109,13 @@ select_IV <- function(geneID, eqtl_data, ncond, LD, ld_thresh=0.5, pval_thresh=0
   eqtl_data$median_p <- matrixStats::rowMedians(as.matrix(eqtl_data[,paste0("pvalue_",1:ncond)]))
   eqtl_data <- subset(eqtl_data, median_p < pval_thresh)
 
-  if(nrow(curr_pvals_dt)==0) stop(paste0("No cis-SNPs for gene with median p below specified threshold of ",pval_thresh,"."))
+  if(nrow(eqtl_data)==0) stop(paste0("No cis-SNPs for gene with median p below specified threshold of ",pval_thresh,"."))
 
   ## obtain set of candidate SNPs
   SNP_pool <- eqtl_data$variant_id
   if(length(SNP_pool)==1){
     return(SNP_pool)
   }
-  SNP_pool <- curr_pvals_dt$variant_id
 
   ## consider allowing option to pass genotype matrix and calculate LD on smaller set
   # geno_dt_sub <- subset(geno_dt,variant_id %in% SNP_pool) ## subset large genotype data.table to current SNP pool

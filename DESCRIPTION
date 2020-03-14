@@ -16,4 +16,4 @@ Imports:
     lme4 (>= 1.1),
     matrixStats (>= 0.53.1),
     mvtnorm (>= 1.0)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

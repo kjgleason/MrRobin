@@ -15,7 +15,7 @@ MR_Robin(eqtl_betas, eqtl_se, gwas_betas, gwas_se, LD, snpID)
 
 \item{gwas_se}{vector of standard errors for coefficient estimates from GWAS study.}
 
-\item{LD}{matrix of LD correlation coefficients.}
+\item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
 \item{snpID}{vector of variant identifiers to be used as instrumental variables.}
 }

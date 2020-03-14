@@ -7,7 +7,7 @@
 #' @param eqtl_se matrix of standard errors for coefficient estimates from eQTL study.
 #' @param gwas_betas vector of coefficient estimates (betas) from GWAS study.
 #' @param gwas_se vector of standard errors for coefficient estimates from GWAS study.
-#' @param LD matrix of LD correlation coefficients.
+#' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
 #' @param snpID vector of variant identifiers to be used as instrumental variables.
 #'
 #' @return An object of class \code{lmerMod}, returned from the reverse regression random slope
@@ -52,7 +52,7 @@ MR_Robin <- function(eqtl_betas,eqtl_se,gwas_betas,gwas_se,LD,snpID){
 #' @param gwas_se vector of standard errors for coefficient estimates from GWAS study.
 #' @param nsamp integer of the number of samples to use in estimating \eqn{P}-value
 #' using a null distribution.
-#' @param LD matrix of LD correlation coefficients.
+#' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
 #'
 #' @return A list of two elements:
 #' \tabular{ll}{

@@ -11,7 +11,7 @@ MR_Robin_setup(eqtl_data, gwas_data, LD, snpID, geneID, ncond)
 
 \item{gwas_data}{data.frame of summary statistics from GWAS study.}
 
-\item{LD}{matrix of LD correlation coefficients.}
+\item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
 \item{snpID}{vector of variant identifiers be used as instruments for \code{geneID}.}
 

@@ -6,7 +6,7 @@
 #'
 #' @param eqtl_data data.frame of summary statistics from eQTL study.
 #' @param gwas_data data.frame of summary statistics from GWAS study.
-#' @param LD matrix of LD correlation coefficients.
+#' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
 #' @param snpID vector of variant identifiers be used as instruments for \code{geneID}.
 #' @param geneID character string of the gene to be tested.
 #' @param ncond integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.
@@ -79,8 +79,8 @@ MR_Robin_setup <- function(eqtl_data, gwas_data, LD, snpID, geneID, ncond){
 #'
 #' @param geneID character string of the gene to be tested.
 #' @param eqtl_data data.frame of summary statistics from eQTL study.
-#' @param ncond integer of the number of conditions (e.g. tissues) analyzed by the eQTL study?MR+.
-#' @param LD matrix of LD correlation coefficients.
+#' @param ncond integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.
+#' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
 #' @param ld_thresh vector of variant identifiers.
 #' @param pval_thresh vector of variant identifiers.
 #'

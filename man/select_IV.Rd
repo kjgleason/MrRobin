@@ -12,9 +12,9 @@ select_IV(geneID, eqtl_data, ncond, LD, ld_thresh = 0.5,
 
 \item{eqtl_data}{data.frame of summary statistics from eQTL study.}
 
-\item{ncond}{integer of the number of conditions (e.g. tissues) analyzed by the eQTL study?MR+.}
+\item{ncond}{integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.}
 
-\item{LD}{matrix of LD correlation coefficients.}
+\item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
 \item{ld_thresh}{vector of variant identifiers.}
 

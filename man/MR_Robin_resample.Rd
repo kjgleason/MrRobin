@@ -14,7 +14,7 @@ MR_Robin_resample(MR_Robin_res, gwas_se, nsamp = 1000, LD)
 \item{nsamp}{integer of the number of samples to use in estimating \eqn{P}-value
 using a null distribution.}
 
-\item{LD}{matrix of LD correlation coefficients.}
+\item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 }
 \value{
 A list of two elements:

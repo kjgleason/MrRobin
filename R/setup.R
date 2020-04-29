@@ -128,7 +128,7 @@ select_IV <- function(geneID, eqtl_data, ncond, LD, ld_thresh=0.5, pval_thresh=0
   selected_snps <- NULL
 
   ## iteratively select best SNP remaining in SNP_pool based on median p-value
-  while(length(SNP_pool > 1)){
+  while(length(SNP_pool) > 1){
     ## identify top SNP in pool
     eqtl_data <- subset(eqtl_data, variant_id %in% SNP_pool)
     next_snp_idx <- which.min(eqtl_data$median_p)

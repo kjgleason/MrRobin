@@ -27,7 +27,7 @@ A list with the following elements:
 \code{eqtl_se} \tab matrix of standard errors for coefficient estimates from eQTL study.\cr
 \code{gwas_betas} \tab vector of coefficient estimates (betas) from GWAS study.\cr
 \code{gwas_se} \tab vector of standard errors for coefficient estimates from GWAS study.\cr
-\code{LD} \tab matrix of LD correlation coefficients.\cr
+\code{LD} \tab matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).\cr
 \code{snpID} \tab vector of variant identifiers to be used as instrumental variables.\cr
 }
 

@@ -92,7 +92,8 @@ MR_Robin_setup <- function(eqtl_data, gwas_data, LD, snpID, geneID, ncond){
 #' variables \code{gene_id} and \code{variant_id} (as identifiers), as well as the variables
 #' \code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\}, corresponding to the
 #' \eqn{P}-value testing the null hypothesis of no association between \code{gene_id} and \code{variant_id}
-#' in each respective eQTL analysis.
+#' in each respective eQTL analysis. Note that the names of the p-value columns must match
+#' the convention \code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\} exactly.
 #'
 #' Note that the matrix \code{LD} should hold \emph{correlation coefficients}
 #' (i.e. \eqn{r}), not their squared values (\eqn{r^2}).

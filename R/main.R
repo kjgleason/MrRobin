@@ -93,6 +93,8 @@ MR_Robin_resample <- function(MR_Robin_res,gwas_se,nsamp=1000,LD){
 
   if(nsamp_used==0) stop("All resampled datasets failed to converge in random slope model.")
 
+  if(nsamp_used<=(nsamp/2)) warning("More than half of resampled datasets failed to converge in random slope model.")
+
   pval <- mean(abs(tstat_nulls) >= abs(tstat_MR_Robin))
 
   return(list(pvalue=pval,nsamp_used=nsamp_used))

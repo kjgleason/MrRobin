@@ -4,24 +4,36 @@
 \alias{MR_Robin}
 \title{Conduct two-sample Mendelian Randomization using summary statistics}
 \usage{
-MR_Robin(eqtl_betas, eqtl_se, gwas_betas, gwas_se, LD, snpID)
+MR_Robin(snpID, gwas_betas, gwas_se, eqtl_betas, eqtl_se, eqtl_pvals, LD,
+  pval_thresh = 0.001)
 }
 \arguments{
-\item{eqtl_betas}{matrix of coefficient estimates (betas) from eQTL study.}
-
-\item{eqtl_se}{matrix of standard errors for coefficient estimates from eQTL study.}
+\item{snpID}{vector of variant identifiers to be used as instrumental variables.}
 
 \item{gwas_betas}{vector of coefficient estimates (betas) from GWAS study.}
 
 \item{gwas_se}{vector of standard errors for coefficient estimates from GWAS study.}
 
+\item{eqtl_betas}{matrix of coefficient estimates (betas) from eQTL study.}
+
+\item{eqtl_se}{matrix of standard errors for coefficient estimates from eQTL study.}
+
+\item{eqtl_pvals}{matrix of p-values from eQTL study.}
+
 \item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
-\item{snpID}{vector of variant identifiers to be used as instrumental variables.}
+\item{pval_thresh}{p-value threshold for instrumental variables (IVs).}
 }
 \value{
-An object of class \code{lmerMod}, returned from the reverse regression random slope
-mixed model run by MR-Robin.
+A list with the following elements:
+\tabular{ll}{
+\code{lme_res} \tab an object of class \code{lmerMod},
+returned from the reverse regression random slope
+mixed model run by MR-Robin..\cr
+\code{gwas_res} \tab data.table of the gwas data (snpID, gwas_beta, gwas_se).\cr
+\code{LD} \tab matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
+}
+The last two items are returned for use by \code{MR_Robin_resample()}.
 
 To conduct inference on the returned results, use function \code{\link{MR_Robin_resample}}.
 }
@@ -31,8 +43,11 @@ ROBust to correlated and some INvalid instruments.
 }
 \details{
 The following are additional details describing the input arguments.
-For \code{eqtl_betas} and \code{eqtl_se}, each row \eqn{i} corresponds to a SNP/variant
-while each column \eqn{j} holds the summary statistics in condition \eqn{j} (e.g. a tissue type).
+For \code{eqtl_betas}, \code{eqtl_se}, and \code{eqtl_pvals}
+each row \eqn{i} corresponds to a SNP/variant/IV
+while each column \eqn{j} holds the summary statistics in tissue type \eqn{j}.
+Both the rows of the eQTL data and the order of the GWAS vectors should
+match the order of \code{snpID}.
 Note that the matrix \code{LD} should hold \emph{correlation coefficients}
 (i.e. \eqn{r}), not their squared values (\eqn{r^2}).
 }

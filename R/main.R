@@ -3,44 +3,86 @@
 #' Runs the main MR-Robin algorithm: a two-sample Mendelian Randomization method
 #' ROBust to correlated and some INvalid instruments.
 #'
-#' @param eqtl_betas matrix of coefficient estimates (betas) from eQTL study.
-#' @param eqtl_se matrix of standard errors for coefficient estimates from eQTL study.
+#' @param snpID vector of variant identifiers to be used as instrumental variables.
 #' @param gwas_betas vector of coefficient estimates (betas) from GWAS study.
 #' @param gwas_se vector of standard errors for coefficient estimates from GWAS study.
+#' @param eqtl_betas matrix of coefficient estimates (betas) from eQTL study.
+#' @param eqtl_se matrix of standard errors for coefficient estimates from eQTL study.
+#' @param eqtl_pvals matrix of p-values from eQTL study.
 #' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
-#' @param snpID vector of variant identifiers to be used as instrumental variables.
+#' @param pval_thresh p-value threshold for instrumental variables (IVs).
 #'
-#' @return An object of class \code{lmerMod}, returned from the reverse regression random slope
-#' mixed model run by MR-Robin.
+#' @return A list with the following elements:
+#' \tabular{ll}{
+#' \code{lme_res} \tab an object of class \code{lmerMod},
+#' returned from the reverse regression random slope
+#' mixed model run by MR-Robin..\cr
+#' \code{gwas_res} \tab data.table of the gwas data (snpID, gwas_beta, gwas_se).\cr
+#' \code{LD} \tab matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
+#' }
+#' The last two items are returned for use by \code{MR_Robin_resample()}.
 #'
 #' To conduct inference on the returned results, use function \code{\link{MR_Robin_resample}}.
 #'
 #' @details The following are additional details describing the input arguments.
-#' For \code{eqtl_betas} and \code{eqtl_se}, each row \eqn{i} corresponds to a SNP/variant
-#' while each column \eqn{j} holds the summary statistics in condition \eqn{j} (e.g. a tissue type).
+#' For \code{eqtl_betas}, \code{eqtl_se}, and \code{eqtl_pvals}
+#' each row \eqn{i} corresponds to a SNP/variant/IV
+#' while each column \eqn{j} holds the summary statistics in tissue type \eqn{j}.
+#' Both the rows of the eQTL data and the order of the GWAS vectors should
+#' match the order of \code{snpID}.
 #' Note that the matrix \code{LD} should hold \emph{correlation coefficients}
 #' (i.e. \eqn{r}), not their squared values (\eqn{r^2}).
 #'
 #' @export
 #'
-MR_Robin <- function(eqtl_betas,eqtl_se,gwas_betas,gwas_se,LD,snpID){
+MR_Robin <- function(snpID,gwas_betas,gwas_se,eqtl_betas,eqtl_se,eqtl_pvals,LD,pval_thresh=0.001){
+
+  if(ncol(eqtl_betas) != ncol(eqtl_se) | ncol(eqtl_betas) != ncol(eqtl_pvals)){
+    stop("eQTL betas, SE and p-values do not all have same number of columns")
+  }
 
   ## determine number of tissues (or conditions/studies/etc.)
   nT <- ncol(eqtl_betas)
 
+  ## rename columns for standardized processing
+  colnames(eqtl_betas) <- paste0("beta_",1:nT)
+  colnames(eqtl_se) <- paste0("SE_",1:nT)
+  colnames(eqtl_pvals) <- paste0("pvalue_",1:nT)
+
+  ## combine eQTL results into data.table
+  eqtl_res <- data.table::data.table(snpID,eqtl_betas,eqtl_se,eqtl_pvals)
+
+  # reshape to long format (each SNP-gene-tissue will be row)
+  eQTL_res_melt <- data.table::melt(eqtl_res,id.vars=c("snpID"),
+                                    measure.vars=patterns("^beta_","^SE_","^pvalue_"),value.name=c("beta","se","pvalue"),
+                                    variable.name="tissue")
+
+  ## subset to strong instrumental variables (based on p-value threshold)
+  eQTL_res_melt_PltThresh <- subset(eQTL_res_melt, pvalue < pval_thresh)
+
+  ## set up gwas data for merging
+  gwas_res <- data.table::data.table(snpID=snpID,gwas_beta=gwas_betas,gwas_se=gwas_se)
+
+  ## merge eQTL and GWAS results
+  setkey(eQTL_res_melt_PltThresh,snpID)
+  setkey(gwas_res,snpID)
+  merged_res <- merge(eQTL_res_melt_PltThresh,gwas_res)
+
   ## set up coefficients for reverse regression
-  beta_x <- matrix(eqtl_betas,ncol=1)
-  beta_y <- rep(gwas_betas, nT)
+  beta_x <- matrix(merged_res$beta,ncol=1)
+  beta_y <- matrix(merged_res$gwas_beta,ncol=1)
 
   ## standard errors (for weights)
-  se_x <- matrix(eqtl_se, ncol=1)
-  se_y <- matrix(gwas_se, ncol=1) ## not used by function; used in resampling (consider returning with results)
+  se_x <- matrix(merged_res$se,ncol=1)
+  se_y <- matrix(merged_res$gwas_se,ncol=1) ## not used by function; used in resampling (consider returning with results)
 
   ##identifiers
-  snpID <- rep(snpID,nT)
+  snpID <- merged_res$snpID
 
-  ## return results from weighted regression with random slopes (and correlated errors)
-  return(lme4::lmer(beta_x~(beta_y-1)+(beta_y-1|snpID),weights=1/se_x^2))
+  lme_res <- lme4::lmer(beta_x~(beta_y-1)+(beta_y-1|snpID),weights=1/se_x^2)
+
+  ## return results from weighted regression with random slopes (and correlated errors) along with GWAS SE and LD (needed for resampling)
+  return(list(lme_res=lme_res,gwas_res=gwas_res,LD=LD))
 }
 
 

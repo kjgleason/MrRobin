@@ -90,11 +90,9 @@ MR_Robin <- function(snpID,gwas_betas,gwas_se,eqtl_betas,eqtl_se,eqtl_pvals,LD,p
 #'
 #' Uses a resampling procedure to estimate a \eqn{P}-value for a MR-Robin object.
 #'
-#' @param MR_Robin_res an object of class \code{lmerMod}, returned by \code{MR_Robin}.
-#' @param gwas_se vector of standard errors for coefficient estimates from GWAS study.
+#' @param MR_Robin_res a list object returned by \code{MR_Robin}.
 #' @param nsamp integer of the number of samples to use in estimating \eqn{P}-value
 #' using a null distribution.
-#' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
 #'
 #' @return A list of two elements:
 #' \tabular{ll}{
@@ -107,25 +105,32 @@ MR_Robin <- function(snpID,gwas_betas,gwas_se,eqtl_betas,eqtl_se,eqtl_pvals,LD,p
 #'
 #' @export
 #'
-MR_Robin_resample <- function(MR_Robin_res,gwas_se,nsamp=1000,LD){
+MR_Robin_resample <- function(MR_Robin_res,nsamp=1e4){
+
+  lme_res <- MR_Robin_res$lme_res
+  gwas_res <- MR_Robin_res$gwas_res
+  LD <- MR_Robin_res$LD
 
   ## extract data from MR-Robin results
-  eqtl_betas <- MR_Robin_res@frame$beta_x
-  snpID <- MR_Robin_res@frame$snpID
-  weights <- MR_Robin_res@frame$`(weights)`
-  tstat_MR_Robin <- summary(MR_Robin_res)$coefficients[1,3]
+  eqtl_betas <- lme_res@frame$beta_x
+  snpID <- lme_res@frame$snpID
+  weights <- lme_res@frame$`(weights)`
+  tstat_MR_Robin <- summary(lme_res)$coefficients[1,3]
   nT <- length(eqtl_betas)/length(unique(snpID))
 
   ## bootstrapped null distribution, accounting for LD correlations
+  gwas_se <- gwas_res$gwas_se
   beta_gwas_nullMat <- mvtnorm::rmvnorm(nsamp,mean=rep(0,length(gwas_se)),sigma=diag(gwas_se) %*% LD %*% diag(gwas_se))
+  ## name columns with corresponding variant identified
+  colnames(beta_gwas_nullMat) <- gwas_res$snpID
 
-  ## initialize return vectors
+  ## initialize return data types
   tstat_nulls <- NULL
   nsamp_used <- 0
 
   ## run MR-Robin on the null models
   for(i in 1:nsamp){
-    beta_gwas_null <- rep(beta_gwas_nullMat[i,], nT)
+    beta_gwas_null <- beta_gwas_nullMat[i,snpID]
     lme_null <- lmer(eqtl_betas~(beta_gwas_null-1)+(beta_gwas_null-1|snpID),weights=weights)
     if(is.null(summary(lme_null)$optinfo$conv$lme4$messages)){
       tstat_nulls <- c(tstat_nulls, summary(lme_null)$coefficients[1,3])

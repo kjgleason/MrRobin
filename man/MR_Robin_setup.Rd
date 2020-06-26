@@ -4,31 +4,32 @@
 \alias{MR_Robin_setup}
 \title{Set up data for MR-Robin algorithm.}
 \usage{
-MR_Robin_setup(eqtl_data, gwas_data, LD, snpID, geneID, ncond)
+MR_Robin_setup(geneID, snpID, eqtl_data, gwas_data, LD, nTiss)
 }
 \arguments{
+\item{geneID}{character string of the gene to be tested.}
+
+\item{snpID}{vector of variant identifiers be used as instruments for \code{geneID}.}
+
 \item{eqtl_data}{data.frame of summary statistics from eQTL study.}
 
 \item{gwas_data}{data.frame of summary statistics from GWAS study.}
 
 \item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
-\item{snpID}{vector of variant identifiers be used as instruments for \code{geneID}.}
-
-\item{geneID}{character string of the gene to be tested.}
-
-\item{ncond}{integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.}
+\item{nTiss}{integer of the number of tissues analyzed by the eQTL study.}
 }
 \value{
 A list with the following elements:
 
 \tabular{ll}{
-\code{eqtl_betas} \tab matrix of coefficient estimates (betas) from eQTL study.\cr
-\code{eqtl_se} \tab matrix of standard errors for coefficient estimates from eQTL study.\cr
+\code{snpID} \tab vector of variant identifiers to be used as instrumental variables.\cr
 \code{gwas_betas} \tab vector of coefficient estimates (betas) from GWAS study.\cr
 \code{gwas_se} \tab vector of standard errors for coefficient estimates from GWAS study.\cr
+\code{eqtl_betas} \tab matrix of coefficient estimates (betas) from eQTL study.\cr
+\code{eqtl_se} \tab matrix of standard errors for coefficient estimates from eQTL study.\cr
+\code{eqtl_pvals} \tab matrix of p-values from eQTL study.\cr
 \code{LD} \tab matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).\cr
-\code{snpID} \tab vector of variant identifiers to be used as instrumental variables.\cr
 }
 
 The returned list elements can be passed to the main \code{\link{MR_Robin}} function.
@@ -43,8 +44,8 @@ The following are additional details describing the input arguments.
 
 The data.frame \code{eqtl_data} should have the character
 variables \code{gene_id} and \code{variant_id} (as identifiers), as well as the variables
-\code{beta_j} and \code{SE_j} for \eqn{j} in \{1,...,\code{ncond}\}, corresponding to the coefficient and
-standard error estimates from each respective eQTL analysis.
+\code{beta_j}, \code{SE_j} and \code{pvalue_j} for \eqn{j} in \{1,...,\code{nTiss}\},
+corresponding to the coefficient, standard error, and p-value estimates from each respective eQTL analysis.
 
 The data.frame \code{gwas_data} should have the character
 variable \code{variant_id}, as well as the variables

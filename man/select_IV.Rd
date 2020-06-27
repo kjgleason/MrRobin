@@ -4,42 +4,49 @@
 \alias{select_IV}
 \title{Select instrumental variables for the MR-Robin analysis.}
 \usage{
-select_IV(geneID, eqtl_data, ncond, LD, ld_thresh = 0.5,
-  pval_thresh = 0.05)
+select_IV(geneID, eqtl_data, nTiss, LD, ld_thresh = 0.5,
+  pval_thresh = 0.001, nTiss_thresh = 2, median_pval_thresh = 0.05)
 }
 \arguments{
 \item{geneID}{character string of the gene to be tested.}
 
 \item{eqtl_data}{data.frame of summary statistics from eQTL study.}
 
-\item{ncond}{integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.}
+\item{nTiss}{integer of the number of tissues analyzed by the eQTL study.}
 
 \item{LD}{matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).}
 
-\item{ld_thresh}{vector of variant identifiers.}
+\item{ld_thresh}{numeric of pairwise LD threshold (\eqn{r^2}) .}
 
-\item{pval_thresh}{vector of variant identifiers.}
+\item{pval_thresh}{numeric of \eqn{P}-value threshold for SNP-tissue pair to be used as IV.}
+
+\item{nTiss_thresh}{integer of minimum number of tissues in which a candidate IV must have
+\eqn{P}-value less than \code{pval_thresh}.}
+
+\item{median_pval_thresh}{numeric of median \eqn{P}-value threshold to use in restricting
+candidate IVs to cross-tissue eQTLs (set to 1 to disable median thresholding).}
 }
 \value{
 A character vector of the SNP/variant identifiers to be used as instrumental variables with \code{geneID}.
 }
 \description{
-Selects a set of instrumental variables based on specified criteria to be used in
+Selects a set of instrumental variables (IVs) based on specified criteria to be used in
 two-sample Mendelian Randomization analysis using MR-Robin. The function iteratively
 selects the SNP/variant with the smallest median \eqn{P}-value of association with
 expression of \code{geneID} and having pairwise LD \eqn{r^2} less than \code{ld_thresh}
 with each SNP already selected. Stops selections when all remaining candidate SNPs
-have median \eqn{P}-value above \code{pval_thresh}.
+have median \eqn{P}-value above \code{median_pval_thresh} or no candidate SNPs
+have \eqn{P}-value less than \code{pval_thresh} in at least \code{nTiss_thresh} tissues.
 }
 \details{
 The following are additional details describing the input arguments.
 
 The data.frame \code{eqtl_data} should have the character
 variables \code{gene_id} and \code{variant_id} (as identifiers), as well as the variables
-\code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\}, corresponding to the
+\code{pvalue_j} for \eqn{j} in \{1,...,\code{nTiss}\}, corresponding to the
 \eqn{P}-value testing the null hypothesis of no association between \code{gene_id} and \code{variant_id}
 in each respective eQTL analysis. Note that the names of the p-value columns must match
-the convention \code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\} exactly.
+the convention \code{pvalue_j} for \eqn{j} in \{1,...,\code{nTiss}\} exactly.
 
 Note that the matrix \code{LD} should hold \emph{correlation coefficients}
 (i.e. \eqn{r}), not their squared values (\eqn{r^2}).

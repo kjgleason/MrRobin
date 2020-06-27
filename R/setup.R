@@ -74,19 +74,24 @@ MR_Robin_setup <- function(geneID, snpID, eqtl_data, gwas_data, LD, nTiss){
 
 #' Select instrumental variables for the MR-Robin analysis.
 #'
-#' Selects a set of instrumental variables based on specified criteria to be used in
+#' Selects a set of instrumental variables (IVs) based on specified criteria to be used in
 #' two-sample Mendelian Randomization analysis using MR-Robin. The function iteratively
 #' selects the SNP/variant with the smallest median \eqn{P}-value of association with
 #' expression of \code{geneID} and having pairwise LD \eqn{r^2} less than \code{ld_thresh}
 #' with each SNP already selected. Stops selections when all remaining candidate SNPs
-#' have median \eqn{P}-value above \code{pval_thresh}.
+#' have median \eqn{P}-value above \code{median_pval_thresh} or no candidate SNPs
+#' have \eqn{P}-value less than \code{pval_thresh} in at least \code{nTiss_thresh} tissues.
 #'
 #' @param geneID character string of the gene to be tested.
 #' @param eqtl_data data.frame of summary statistics from eQTL study.
-#' @param ncond integer of the number of conditions (e.g. tissues) analyzed by the eQTL study.
+#' @param nTiss integer of the number of tissues analyzed by the eQTL study.
 #' @param LD matrix of LD correlation coefficients (\eqn{r}, not \eqn{r^2}).
-#' @param ld_thresh vector of variant identifiers.
-#' @param pval_thresh vector of variant identifiers.
+#' @param ld_thresh numeric of pairwise LD threshold (\eqn{r^2}) .
+#' @param pval_thresh numeric of \eqn{P}-value threshold for SNP-tissue pair to be used as IV.
+#' @param nTiss_thresh integer of minimum number of tissues in which a candidate IV must have
+#' \eqn{P}-value less than \code{pval_thresh}.
+#' @param median_pval_thresh numeric of median \eqn{P}-value threshold to use in restricting
+#' candidate IVs to cross-tissue eQTLs (set to 1 to disable median thresholding).
 #'
 #' @return A character vector of the SNP/variant identifiers to be used as instrumental variables with \code{geneID}.
 #'
@@ -94,27 +99,30 @@ MR_Robin_setup <- function(geneID, snpID, eqtl_data, gwas_data, LD, nTiss){
 #'
 #' The data.frame \code{eqtl_data} should have the character
 #' variables \code{gene_id} and \code{variant_id} (as identifiers), as well as the variables
-#' \code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\}, corresponding to the
+#' \code{pvalue_j} for \eqn{j} in \{1,...,\code{nTiss}\}, corresponding to the
 #' \eqn{P}-value testing the null hypothesis of no association between \code{gene_id} and \code{variant_id}
 #' in each respective eQTL analysis. Note that the names of the p-value columns must match
-#' the convention \code{pvalue_j} for \eqn{j} in \{1,...,\code{ncond}\} exactly.
+#' the convention \code{pvalue_j} for \eqn{j} in \{1,...,\code{nTiss}\} exactly.
 #'
 #' Note that the matrix \code{LD} should hold \emph{correlation coefficients}
 #' (i.e. \eqn{r}), not their squared values (\eqn{r^2}).
 #'
 #' @export
 #'
-select_IV <- function(geneID, eqtl_data, ncond, LD, ld_thresh=0.5, pval_thresh=0.05){
+select_IV <- function(geneID, eqtl_data, nTiss, LD, ld_thresh=0.5, pval_thresh=0.001, nTiss_thresh=2, median_pval_thresh=0.05){
 
   ## subset eQTL dataset to gene of interest
   if(!(geneID %in% eqtl_data$gene_id)) stop("Gene is missing in eQTL dataset")
   eqtl_data <- subset(eqtl_data, gene_id == geneID)
 
-
-  eqtl_data$median_p <- matrixStats::rowMedians(as.matrix(eqtl_data[,paste0("pvalue_",1:ncond)]))
-  eqtl_data <- subset(eqtl_data, median_p < pval_thresh)
-
-  if(nrow(eqtl_data)==0) stop(paste0("No cis-SNPs for gene with median p below specified threshold of ",pval_thresh,"."))
+  # pval_mat <- as.matrix(eqtl_data[,paste0("pvalue_",1:nTiss)])
+  pval_mat <- as.matrix(subset(eqtl_data,select=paste0("pvalue_",1:nTiss)))
+  eqtl_data$median_p <- matrixStats::rowMedians(pval_mat)
+  eqtl_data$nTissThresh_p <- apply(pval_mat, 1, function(x) sort(x)[nTiss_thresh])
+  eqtl_data <- subset(eqtl_data, median_p < median_pval_thresh)
+  if(nrow(eqtl_data)==0) stop(paste0("No cis-SNPs for gene with median p below specified threshold of ",median_pval_thresh,"."))
+  eqtl_data <- subset(eqtl_data, nTissThresh_p < pval_thresh)
+  if(nrow(eqtl_data)==0) stop(paste0("No cis-SNPs for gene with p<",pval_thresh," in at least ",nTiss_thresh," tissues."))
 
   ## obtain set of candidate SNPs
   SNP_pool <- eqtl_data$variant_id
@@ -128,6 +136,8 @@ select_IV <- function(geneID, eqtl_data, ncond, LD, ld_thresh=0.5, pval_thresh=0
   # colnames(geno_mat) <- geno_dt_sub$variant_id
   # LD_r2 <- cor(geno_mat,use="pairwise.complete")^2
 
+  ## restrict LD matrix to SNPs in data set
+  LD <- LD[eqtl_data$variant_id,eqtl_data$variant_id]
   LD_r2 <- LD^2
 
   selected_snps <- NULL
